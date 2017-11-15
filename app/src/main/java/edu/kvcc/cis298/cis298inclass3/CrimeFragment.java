@@ -1,10 +1,9 @@
-package edu.kvcc.cis298.cis298inclass2;
+package edu.kvcc.cis298.cis298inclass3;
 
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;

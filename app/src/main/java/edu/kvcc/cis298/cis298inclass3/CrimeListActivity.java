@@ -1,4 +1,4 @@
-package edu.kvcc.cis298.cis298inclass2;
+package edu.kvcc.cis298.cis298inclass3;
 
 import android.support.v4.app.Fragment;
 
