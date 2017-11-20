@@ -14,6 +14,20 @@ public class Crime {
     private Date mDate;
     private boolean mSolved;
 
+    public void setId(UUID id) {
+        mId = id;
+    }
+
+    public String getSuspect() {
+        return mSuspect;
+    }
+
+    public void setSuspect(String suspect) {
+        mSuspect = suspect;
+    }
+
+    private String mSuspect;
+
     public Crime() {
         mId = UUID.randomUUID();
         mDate = new Date();
