@@ -1,12 +1,14 @@
 package edu.kvcc.cis298.cis298inclass3;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -41,6 +44,7 @@ public class CrimeListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        new FetchCrimesTask().execute();
     }
 
     @Override
@@ -279,6 +283,19 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+    }
+
+
+    private class FetchCrimesTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //Make a new CrimeFetcher instance and call the fetchCrimes
+            //method on that instance.
+            new CrimeFetcher().fetchCrimes();
+            //Return null for now
+            return null;
         }
     }
 
