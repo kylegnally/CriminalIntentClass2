@@ -149,12 +149,7 @@ public class CrimeListFragment extends Fragment {
         //Check to see if the adapter is already created. If so, no need
         //to make it again. Just notify that the data set has changed.
         if (mAdapter == null) {
-            //Make a new adapter for the Recycler View and send over
-            //the crime List
-            mAdapter = new CrimeAdapter(crimes);
-
-            //Set the adapter on the Recycler View
-            mCrimeRecyclerView.setAdapter(mAdapter);
+            setupAdapter(crimes);
         } else {
             //Tell the adapter that the data set has changed, which will
             //force a reload of all the data.
@@ -162,6 +157,19 @@ public class CrimeListFragment extends Fragment {
         }
         //Ensure that the subtitle gets updated when the rest of the UI does.
         updateSubtitle();
+    }
+
+    private void setupAdapter(List<Crime> crimes) {
+        //Check to see if the recycler view has been added to the
+        //fragment
+        if (isAdded()) {
+            //Make a new adapter for the Recycler View and send over
+            //the crime List
+            mAdapter = new CrimeAdapter(crimes);
+
+            //Set the adapter on the Recycler View
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }
     }
 
     private void updateSubtitle() {
@@ -287,15 +295,26 @@ public class CrimeListFragment extends Fragment {
     }
 
 
-    private class FetchCrimesTask extends AsyncTask<Void, Void, Void> {
+    private class FetchCrimesTask extends AsyncTask<Void, Void, List<Crime>> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected List<Crime> doInBackground(Void... voids) {
             //Make a new CrimeFetcher instance and call the fetchCrimes
-            //method on that instance.
-            new CrimeFetcher().fetchCrimes();
-            //Return null for now
-            return null;
+            //method on that instance, which will return a list of crimes
+            //that it gets from the network resource.
+            return new CrimeFetcher().fetchCrimes();
+        }
+
+        @Override
+        protected void onPostExecute(List<Crime> crimes) {
+            //Get the crimeLab singleton
+            CrimeLab lab = CrimeLab.get(getActivity());
+            //Use the setter for the crimes to set the
+            //crimes that are passed into this method
+            lab.setCrimes(crimes);
+            //Now that we know that we have a data source, we can
+            //setup the adapter for the recycler view.
+            setupAdapter(crimes);
         }
     }
 
