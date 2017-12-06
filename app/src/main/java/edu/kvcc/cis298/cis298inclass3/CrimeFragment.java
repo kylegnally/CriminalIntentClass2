@@ -2,6 +2,7 @@ package edu.kvcc.cis298.cis298inclass3;
 
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -13,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -234,13 +236,22 @@ public class CrimeFragment extends Fragment {
             Uri contactUri = data.getData();
             //Specify which fields you want your query to return
             //values for
+            //Get the Display name for showing the contacts name
+            //Get the _ID for use in querying the email table
             String[] queryFields = new String[] {
-                    ContactsContract.Contacts.DISPLAY_NAME
+                    ContactsContract.Contacts.DISPLAY_NAME, //index 0
+                    ContactsContract.Contacts._ID           //index 1
             };
+
+            //Get the content resolver that we can use to make queries on contacts
+            ContentResolver contentResolver = getActivity().getContentResolver();
+
             //Perform your query - the contactUri is like a "where"
             //clause here
-            Cursor c = getActivity().getContentResolver()
-                    .query(contactUri, queryFields, null,null,null);
+            Cursor c = contentResolver.query(contactUri, queryFields, null,null,null);
+
+            //Make a new Cursor that will be used for the Email table
+            Cursor emailCursor = null;
 
             try {
                 //Double-check that you already got results
@@ -264,12 +275,58 @@ public class CrimeFragment extends Fragment {
                 //If we had 2 columns, we would need to pull them both out
                 //with indexes 0 and 1.
                 String suspect = c.getString(0);
+
+                //Get the ID of the contact. It will be in the 1 index
+                //since it is in the 2nd spot of the queryFields array above
+                String id = c.getString(1);
+                //Alternatively you could do this, probably less efficent:
+                //String id = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
+
+                //Now that we have the ID of the contact, let's try to get the email
+                //of the contact from the email table
+
+                //Make query fields for getting the email
+                String[] emailQueryFields = new String[]{
+                        ContactsContract.CommonDataKinds.Email.DATA
+                };
+
+                //Make a query to the email contact URI.
+                //Argument order is as follows:
+                //1. Content URI
+                //2. Query Fields
+                //3. Where Clause
+                //4. Where Args
+                //5. Sort Order??
+                emailCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        emailQueryFields,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                        new String[]{id},
+                        null
+                );
+
+                //Move to the first record in the query result
+                emailCursor.moveToFirst();
+
+                //I would assign this to a class level if I had it.
+                //local for demo purposes
+                //Since we only queried out the email, I know it is in index 0
+                String contactEmail = emailCursor.getString(0);
+
                 //Once we have it, use the suspect string to update
                 //the crime and the button text
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
+
+            } catch (Exception e) {
+                Log.e("Crime", e.getMessage() + e.getStackTrace());
             } finally {
-                c.close();
+                if (c != null) {
+                    c.close();
+                }
+                if (emailCursor != null) {
+                    emailCursor.close();
+                }
             }
 
 
